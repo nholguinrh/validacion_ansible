@@ -9,7 +9,7 @@
       path: /var/log/ansible_validations.log
       state: touch
 
-  # Paso 3: Verificación de que el sistema esté actualizado
+  # Paso 1: Verificación de que el sistema esté actualizado
   - name: Verificar si el sistema está actualizado
     ansible.builtin.shell: yum check-update
     register: update_check
@@ -20,7 +20,7 @@
       line: "El sistema no está actualizado en {{ inventory_hostname }}."
     when: update_check.rc != 0
 
-  # Paso 4: Verificar si samba y samba-client están instalados
+  # Paso 2: Verificar si samba y samba-client están instalados
   - name: Verificar instalación de samba y samba-client
     ansible.builtin.package:
       name:
@@ -35,7 +35,7 @@
       line: "Samba o samba-client no están instalados en {{ inventory_hostname }}."
     when: samba_check.changed
 
-  # Paso 5: Verificar si SELinux está activo
+  # Paso 3: Verificar si SELinux está activo
   - name: Verificar si SELinux está activo
     ansible.builtin.shell: getenforce
     register: selinux_status
@@ -45,7 +45,7 @@
       line: "SELinux no está activo en {{ inventory_hostname }}."
     when: selinux_status.stdout != "Enforcing"
 
-  # Paso 6: Verificar si CUPS está deshabilitado
+  # Paso 4: Verificar si CUPS está deshabilitado
   - name: Verificar si CUPS está deshabilitado
     ansible.builtin.systemd:
       name: cups
@@ -60,7 +60,7 @@
       line: "CUPS está activo o habilitado en {{ inventory_hostname }}."
     when: cups_status.changed
 
-  # Paso 7: Verificar usuarios y contraseñas
+  # Paso 5: Verificar usuarios y contraseñas
   - name: Verificar usuarios y contraseñas
     ansible.builtin.user:
       name: "{{ item }}"
@@ -81,7 +81,7 @@
       line: "El usuario {{ item.item }} no está presente o no tiene la contraseña correcta en {{ inventory_hostname }}."
     when: users_check.results | selectattr('changed') | list | length > 0
 
-  # Paso 8: Verificar carpeta ~/guias
+  # Paso 6: Verificar carpeta ~/guias
   - name: Verificar que la carpeta ~/guias exista y pertenezca al grupo hackatonLabs
     ansible.builtin.file:
       path: /home/{{ ansible_user }}/guias
@@ -97,7 +97,7 @@
       line: "La carpeta ~/guias no existe o no pertenece al grupo hackatonLabs en {{ inventory_hostname }}."
     when: guias_folder_check.changed
 
-  # Paso 9: Verificar que existan 100 archivos vacíos
+  # Paso 7: Verificar que existan 100 archivos vacíos
   - name: Verificar si existen 100 archivos en ~/guias
     ansible.builtin.shell: |
       for i in $(seq 1 100); do
@@ -111,7 +111,7 @@
       line: "No existen 100 archivos archivo-1.txt a archivo-100.txt en {{ inventory_hostname }}."
     when: archivos_check.changed
 
-  # Paso 10: Verificar carpeta /guias/config y archivos
+  # Paso 8: Verificar carpeta /guias/config y archivos
   - name: Verificar que /guias/config tenga copias de archivos importantes
     ansible.builtin.command:
       cmd: stat /guias/config
@@ -140,7 +140,7 @@
       line: "Las copias de archivos no están presentes en /guias/config en {{ inventory_hostname }}."
     when: copy_check.changed
 
-  # Paso 11: Validar enlace simbólico en /guias/config
+  # Paso 9: Validar enlace simbólico en /guias/config
   - name: Verificar si el enlace simbólico /guias/config/grupos existe y apunta a /etc/group
     ansible.builtin.file:
       path: /guias/config/grupos
@@ -154,7 +154,7 @@
       line: "El enlace simbólico /guias/config/grupos no existe o está mal creado en {{ inventory_hostname }}."
     when: symlink_check.changed
 
-  # Paso 12: Verificar la frase en /etc/motd
+  # Paso 10: Verificar la frase en /etc/motd
   - name: Verificar si la frase 'El problema no es problema' está en /etc/motd
     ansible.builtin.shell: grep -Fxq 'El problema no es problema' /etc/motd
     register: motd_check
@@ -165,7 +165,7 @@
       line: "La frase 'El problema no es problema' no está en /etc/motd en {{ inventory_hostname }}."
     when: motd_check.rc != 0
 
-  # Paso 13: Verificar particiones en el sistema operativo
+  # Paso 11: Verificar particiones en el sistema operativo
   - name: Verificar si el archivo /tmp/particiones.txt existe y contiene las particiones correctas
     ansible.builtin.command:
       cmd: "diff <(lsblk -no NAME,SIZE) /tmp/particiones.txt"
@@ -178,7 +178,7 @@
       line: "Las particiones no coinciden o /tmp/particiones.txt no existe en {{ inventory_hostname }}."
     when: partitions_check.rc != 0
 
-  # Paso 14: Verificar que haya 25GB de espacio disponible
+  # Paso 12: Verificar que haya 25GB de espacio disponible
   - name: Verificar que haya 25GB de espacio disponible
     ansible.builtin.shell: |
       df -h / | awk '$4 ~ /[2-9][0-9]G|100G/{ print $4 }'

@@ -4,143 +4,138 @@
   become: yes
   tasks:
 
-  - name: Crear archivo de log si no existe
-    ansible.builtin.file:
-      path: /var/log/ansible_validations.log
-      state: touch
+    - name: Crear archivo de log si no existe
+      ansible.builtin.file:
+        path: /var/log/ansible_validations.log
+        state: touch
 
-  # 1. Verificación de que el sistema esté actualizado
-  - name: Verificar si el sistema está actualizado
-    ansible.builtin.shell: yum check-update
-    register: update_check
-    ignore_errors: yes
+    # 1. Verificación de que el sistema esté actualizado
+    - name: Verificar si el sistema está actualizado
+      ansible.builtin.shell: yum check-update
+      register: update_check
+      ignore_errors: yes
 
-  - name: Mostrar mensaje sobre la actualización del sistema
-    ansible.builtin.debug:
-      msg: "Punto 1: El sistema está actualizado en {{ inventory_hostname }}."
-    when: update_check.rc == 0
+    - name: Mostrar mensaje sobre la actualización del sistema
+      ansible.builtin.debug:
+        msg: "Punto 1: El sistema está actualizado en {{ inventory_hostname }}."
+      when: update_check.rc == 0
 
-  - name: Mostrar mensaje si el sistema no está actualizado
-    ansible.builtin.debug:
-      msg: "Punto 1 Invalido: El sistema tiene actualizaciones pendientes en {{ inventory_hostname }}."
-    when: update_check.rc != 0
+    - name: Mostrar mensaje si el sistema no está actualizado
+      ansible.builtin.debug:
+        msg: "Punto 1 Invalido: El sistema tiene actualizaciones pendientes en {{ inventory_hostname }}."
+      when: update_check.rc != 0
 
-  - name: Registrar log si el sistema no está actualizado
-    ansible.builtin.lineinfile:
-      path: /var/log/ansible_validations.log
-      line: "El sistema no está actualizado en {{ inventory_hostname }}."
-    when: update_check.rc != 0
+    - name: Registrar log si el sistema no está actualizado
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "El sistema no está actualizado en {{ inventory_hostname }}."
+      when: update_check.rc != 0
 
-  # 2. Verificar si samba y samba-client están instalados
-  - name: Verificar instalación de samba y samba-client
-    ansible.builtin.command:
-      cmd: "rpm -q samba samba-client"
-    register: samba_check
-    ignore_errors: yes
+    # 2. Verificar si samba y samba-client están instalados
+    - name: Verificar instalación de samba y samba-client
+      ansible.builtin.command:
+        cmd: "rpm -q samba samba-client"
+      register: samba_check
+      ignore_errors: yes
 
-  - name: Mostrar mensaje sobre la instalación de samba y samba-client
-    ansible.builtin.debug:
-      msg: "Punto 2: Samba y samba-client están instalados en {{ inventory_hostname }}."
-    when: samba_check.rc == 0
+    - name: Mostrar mensaje sobre la instalación de samba y samba-client
+      ansible.builtin.debug:
+        msg: "Punto 2: Samba y samba-client están instalados en {{ inventory_hostname }}."
+      when: samba_check.rc == 0
 
-  - name: Mostrar mensaje si samba o samba-client no están instalados
-    ansible.builtin.debug:
-      msg: "Punto 2 Invalido: Samba o samba-client no están instalados en {{ inventory_hostname }}."
-    when: samba_check.rc != 0
+    - name: Mostrar mensaje si samba o samba-client no están instalados
+      ansible.builtin.debug:
+        msg: "Punto 2 Invalido: Samba o samba-client no están instalados en {{ inventory_hostname }}."
+      when: samba_check.rc != 0
 
-  - name: Registrar log si samba o samba-client no están instalados
-    ansible.builtin.lineinfile:
-      path: /var/log/ansible_validations.log
-      line: "Samba o samba-client no están instalados en {{ inventory_hostname }}."
-    when: samba_check.rc != 0
+    - name: Registrar log si samba o samba-client no están instalados
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Samba o samba-client no están instalados en {{ inventory_hostname }}."
+      when: samba_check.rc != 0
 
-  # 3. Verificar si SELinux está activo
-  - name: Verificar si SELinux está activo
-    ansible.builtin.shell: getenforce
-    register: selinux_status
+    # 3. Verificar si SELinux está activo
+    - name: Verificar si SELinux está activo
+      ansible.builtin.shell: getenforce
+      register: selinux_status
 
-  - name: Mostrar mensaje sobre SELinux
-    ansible.builtin.debug:
-      msg: "Punto 3: SELinux está activo en {{ inventory_hostname }}."
-    when: selinux_status.stdout == "Enforcing"
+    - name: Mostrar mensaje sobre SELinux
+      ansible.builtin.debug:
+        msg: "Punto 3: SELinux está activo en {{ inventory_hostname }}."
+      when: selinux_status.stdout == "Enforcing"
 
-  - name: Mostrar mensaje si SELinux no está activo
-    ansible.builtin.debug:
-      msg: "Punto 3 Invalido: SELinux no está activo en {{ inventory_hostname }}."
-    when: selinux_status.stdout != "Enforcing"
+    - name: Mostrar mensaje si SELinux no está activo
+      ansible.builtin.debug:
+        msg: "Punto 3 Invalido: SELinux no está activo en {{ inventory_hostname }}."
+      when: selinux_status.stdout != "Enforcing"
 
-  - name: Registrar log si SELinux no está activo
-    ansible.builtin.lineinfile:
-      path: /var/log/ansible_validations.log
-      line: "SELinux no está activo en {{ inventory_hostname }}."
-    when: selinux_status.stdout != "Enforcing"
-    
+    - name: Registrar log si SELinux no está activo
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "SELinux no está activo en {{ inventory_hostname }}."
+      when: selinux_status.stdout != "Enforcing"
 
-  - name: Verificación de servicio CUPS
-    hosts: localhost
-    become: yes
-    tasks:
+    # 4. Verificación de servicio CUPS
+    - name: Verificar si CUPS está instalado
+      command: systemctl status cups
+      register: cups_status
+      ignore_errors: true
 
-      - name: Verificar si CUPS está instalado
-        command: systemctl status cups
-        register: cups_status
-        ignore_errors: true
+    - name: Registrar en el log si CUPS no está instalado
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible-cups.log
+        create: yes
+        line: "El servicio CUPS no está instalado en {{ inventory_hostname }} - {{ ansible_date_time.date }}."
+      when: cups_status.failed
 
-      - name: Registrar en el log si CUPS no está instalado
-        ansible.builtin.lineinfile:
-          path: /var/log/ansible-cups.log
-          create: yes
-          line: "El servicio CUPS no está instalado en {{ inventory_hostname }} - {{ ansible_date_time.date }}."
-        when: cups_status.failed
+    - block:
+        # 4.3.1 Validar si CUPS está detenido
+        - name: Validar si CUPS está detenido
+          ansible.builtin.systemd:
+            name: cups
+            state: stopped
+            enabled: no
+          register: cups_check
 
-      - block:
-          # 4.3.1 Validar si CUPS está detenido
-          - name: Validar si CUPS está detenido
-            ansible.builtin.systemd:
-              name: cups
-              state: stopped
-              enabled: no
-            register: cups_check
+        - name: Mostrar mensaje si CUPS está detenido y deshabilitado
+          debug:
+            msg: "El servicio CUPS está deshabilitado y detenido en {{ inventory_hostname }}."
+          when:
+            - cups_check.status == 3
+            - cups_check.enabled == false
 
-          - name: Mostrar mensaje si CUPS está detenido y deshabilitado
-            debug:
-              msg: "El servicio CUPS está deshabilitado y detenido en {{ inventory_hostname }}."
-            when:
-              - cups_check.status == 3
-              - cups_check.enabled == false
+        - name: Mostrar mensaje si CUPS está habilitado o en ejecución
+          debug:
+            msg: "El servicio CUPS está habilitado o en ejecución en {{ inventory_hostname }}."
+          when:
+            - cups_check.status != 3 or cups_check.enabled != false
 
-          - name: Mostrar mensaje si CUPS está habilitado o en ejecución
-            debug:
-              msg: "El servicio CUPS está habilitado o en ejecución en {{ inventory_hostname }}."
-            when:
-              - cups_check.status != 3 or cups_check.enabled != false
+      when: not cups_status.failed
 
-        when: not cups_status.failed
+    # 5. Verificación de usuarios
+    - name: Verificar si los usuarios existen
+      ansible.builtin.shell: id {{ item }}
+      loop:
+        - compras
+        - comercial
+        - ventas
+        - administrativo
+        - soporte
+      register: users_check
+      ignore_errors: yes
 
-  # 5. Verificación de usuarios
-  - name: Verificar si los usuarios existen
-    ansible.builtin.shell: id {{ item }}
-    loop:
-      - compras
-      - comercial
-      - ventas
-      - administrativo
-      - soporte
-    register: users_check
-    ignore_errors: yes
+    - name: Mostrar mensaje si todos los usuarios existen
+      ansible.builtin.debug:
+        msg: "Punto 5: Todos los usuarios existen en {{ inventory_hostname }}."
+      when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
 
-  - name: Mostrar mensaje si todos los usuarios existen
-    ansible.builtin.debug:
-      msg: "Punto 5: Todos los usuarios existen en {{ inventory_hostname }}."
-    when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
+    - name: Mostrar mensaje si algún usuario no existe
+      ansible.builtin.debug:
+        msg: "Punto 5 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
+      when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
 
-  - name: Mostrar mensaje si algún usuario no existe
-    ansible.builtin.debug:
-      msg: "Punto 5 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
-    when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
-
-  - name: Registrar log si algún usuario no existe
-    ansible.builtin.lineinfile:
-      path: /var/log/ansible_validations.log
-      line: "El usuario {{ item }} no existe en {{ inventory_hostname }}."
-    when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
+    - name: Registrar log si algún usuario no existe
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "El usuario {{ item }} no existe en {{ inventory_hostname }}."
+      when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0

@@ -213,7 +213,7 @@
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
-      when: file_check.exists  
+      when: file_check.stat.exists  
       ignore_errors: yes
     - name: Verificar copias de archivos
       ansible.builtin.stat:
@@ -224,7 +224,7 @@
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 7 Valido: Las copias de archivos passwd están presentes en /guias/config."
-      when: file_check.exists  
+      when: file_check.stat.exists  
     - name: Verificar copias de archivos
       ansible.builtin.stat:
        path: /guias/config/linux.words
@@ -234,7 +234,7 @@
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 7 Valido: Las copias de archivos linux.words están presentes en /guias/config."
-      when: file_check.exists        
+      when: file_check.stat.exists        
 
     - name: Verificar copias de archivos
       ansible.builtin.stat:
@@ -245,7 +245,7 @@
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
-      when: file_check.exists  
+      when: file_check.stat.exists  
 
     - name: Registrar log si las copias de archivos no están presentes en /guias/config
       ansible.builtin.lineinfile:

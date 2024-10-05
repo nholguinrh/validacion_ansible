@@ -111,10 +111,10 @@
       when: guias_folder_check.changed
 
     # 6. Verificar que existan 100 archivos vacíos
-    - name: Verificar si existen 100 archivos en ~/guias
+    - name: Verificar si existen 100 archivos en /guias
       ansible.builtin.shell: |
         for i in $(seq 1 100); do
-          touch ~/guias/archivo-$i.txt
+          touch /guias/archivo-$i.txt
         done
       check_mode: yes
       register: archivos_check

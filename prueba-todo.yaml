@@ -98,16 +98,16 @@
     - name: Registrar log si los usuarios existen
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "Punto 4 VALIDO: Todos los usuarios existen en {{ inventory_hostname }}."
+        line: "Punto 4 VALIDO: Todos los usuarios existen."
       when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
     - name: Mostrar mensaje si algún usuario no existe
       ansible.builtin.debug:
-        msg: "Punto 4 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
+        msg: "Punto 4 Invalido: Algún usuario no existe."
       when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
     - name: Registrar log si algún usuario no existe
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "Punto 4 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
+        line: "Punto 4 Invalido: Algún usuario no existe."
       when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
 
     # 5. Verificar la existencia de la carpeta /guias y su pertenencia al grupo hackatonLabs
@@ -214,17 +214,16 @@
         line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
       when: file_check.exist  
 
-     - name: Verificar copias de archivos
-       ansible.builtin.command:
+    - name: Verificar copias de archivos
+      ansible.builtin.command:
          cmd: stat /guias/config/passwd
-       register: file_check 
-     - name: redhat-release están presentes en /guias/config
-       ansible.builtin.lineinfile:
-         path: /var/log/ansible_validations.log
-         line: "Punto 7 Valido: Las copias de archivos passwd están presentes en /guias/config."
-       when: file_check.exist  
-
-      - name: Verificar copias de archivos
+      register: file_check 
+    - name: redhat-release están presentes en /guias/config
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 7 Valido: Las copias de archivos passwd están presentes en /guias/config."
+      when: file_check.exist  
+     - name: Verificar copias de archivos
        ansible.builtin.command:
          cmd: stat /guias/config/linux.words
        register: file_check 
@@ -235,20 +234,20 @@
        when: file_check.exist        
 
       - name: Verificar copias de archivos
-      ansible.builtin.command:
-        cmd: stat /guias/config/redhat-release
-      register: file_check 
-    - name: redhat-release están presentes en /guias/config
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
-      when: file_check.exist  
+        ansible.builtin.command:
+          cmd: stat /guias/config/redhat-release
+        register: file_check 
+      - name: redhat-release están presentes en /guias/config
+        ansible.builtin.lineinfile:
+          path: /var/log/ansible_validations.log
+          line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
+        when: file_check.exist  
 
-    - name: Registrar log si las copias de archivos no están presentes en /guias/config
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "Punto 7 Invalido: Las copias de archivos no están presentes en /guias/config."
-      when: copy_check.changed
+      - name: Registrar log si las copias de archivos no están presentes en /guias/config
+        ansible.builtin.lineinfile:
+          path: /var/log/ansible_validations.log
+          line: "Punto 7 Invalido: Las copias de archivos no están presentes en /guias/config."
+        when: copy_check.changed
 
     # 8. Validar enlace simbólico en /guias/config
     - name: Verificar si el enlace simbólico /guias/config/grupos existe y apunta a /etc/group

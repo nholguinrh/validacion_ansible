@@ -205,16 +205,45 @@
       when: guias_config_check.failed
 
     - name: Verificar copias de archivos
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: /guias/config/
-        remote_src: yes
-      check_mode: yes
-      loop:
-        - /etc/redhat-release
-        - /etc/passwd
-        - /usr/share/dict/linux.words
-      register: copy_check
+      ansible.builtin.command:
+        cmd: stat /guias/config/redhat-release
+      register: file_check 
+    - name: redhat-release están presentes en /guias/config
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
+      when: file_check.exist  
+
+     - name: Verificar copias de archivos
+       ansible.builtin.command:
+         cmd: stat /guias/config/passwd
+       register: file_check 
+     - name: redhat-release están presentes en /guias/config
+       ansible.builtin.lineinfile:
+         path: /var/log/ansible_validations.log
+         line: "Punto 7 Valido: Las copias de archivos passwd están presentes en /guias/config."
+       when: file_check.exist  
+
+      - name: Verificar copias de archivos
+       ansible.builtin.command:
+         cmd: stat /guias/config/linux.words
+       register: file_check 
+     - name: redhat-release están presentes en /guias/config
+       ansible.builtin.lineinfile:
+         path: /var/log/ansible_validations.log
+         line: "Punto 7 Valido: Las copias de archivos linux.words están presentes en /guias/config."
+       when: file_check.exist        
+
+      - name: Verificar copias de archivos
+      ansible.builtin.command:
+        cmd: stat /guias/config/redhat-release
+      register: file_check 
+    - name: redhat-release están presentes en /guias/config
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
+      when: file_check.exist  
+
     - name: Registrar log si las copias de archivos no están presentes en /guias/config
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log

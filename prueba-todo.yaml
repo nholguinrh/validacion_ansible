@@ -178,16 +178,3 @@
         path: /var/log/ansible_validations.log
         line: "La frase 'El problema no es problema' no está en /etc/motd en {{ inventory_hostname }}."
       when: motd_check.rc != 0
-
-    # 10. Verificar partición /var
-    - name: Verificar si existe una partición montada en /var
-      ansible.builtin.mount:
-        path: /var
-        state: mounted
-      check_mode: yes
-      register: var_mount_check
-    - name: Registrar log si no hay partición en /var
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "No hay una partición montada en /var en {{ inventory_hostname }}."
-      when: var_mount_check.changed

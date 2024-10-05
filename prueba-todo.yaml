@@ -18,7 +18,8 @@
     ansible.builtin.lineinfile:
       path: /var/log/ansible_validations.log
       line: "El sistema no está actualizado en {{ inventory_hostname }}."
-      shell: echo 'Punto 1 Invalido el sistema tiene actualizaciones pendientes'
+      - name: salida de consola
+        shell: echo 'Punto 1 Invalido el sistema tiene actualizaciones pendientes'
     when: update_check.rc != 0
 
   # 2. Verificar si samba y samba-client están instalados (solo validación)

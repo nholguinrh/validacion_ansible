@@ -136,9 +136,9 @@
           ansible.builtin.debug:
             msg: >
               {% if files_missing | length > 0 %}
-              Punto 6 Invalido: Faltan los archivos {{ files_missing }} en {{ inventory_hostname }}.
+              Punto 6 Invalido: Faltan los archivos {{ files_missing }}.
               {% else %}
-              Punto 6: Todos los archivos están presentes en {{ inventory_hostname }}.
+              Punto 6 Valido: Todos los archivos están presentes.
               {% endif %}
           
         - name: Registrar log sobre archivos faltantes
@@ -146,14 +146,14 @@
             path: /var/log/ansible_validations.log
             line: >
               {% if files_missing | length > 0 %}
-              Punto 6 Invalido: Faltan los archivos {{ files_missing }} en {{ inventory_hostname }}.
+              Punto 6 Invalido: Faltan los archivos {{ files_missing }}.
               {% else %}
-              Punto 6: Todos los archivos están presentes en {{ inventory_hostname }}.
+              Punto 6 Valido: Todos los archivos están presentes.
               {% endif %}
 
 
     # 7. Verificar carpeta /guias/config y archivos
-    - name: Verificar que /guias/config tenga copias de archivos importantes
+    - name: Verificar que /guias/config tenga copias de archivos
       ansible.builtin.command:
         cmd: stat /guias/config
       check_mode: yes
@@ -161,7 +161,7 @@
     - name: Registrar log si /guias/config no contiene las copias necesarias
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "/guias/config no tiene los archivos necesarios en {{ inventory_hostname }}."
+        line: "Punto 7: Invalido /guias/config no tiene los archivos necesarios."
       when: guias_config_check.failed
 
     - name: Verificar copias de archivos
@@ -178,7 +178,7 @@
     - name: Registrar log si las copias de archivos no están presentes en /guias/config
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "Las copias de archivos no están presentes en /guias/config en {{ inventory_hostname }}."
+        line: "Punto 7 Invalido: Las copias de archivos no están presentes en /guias/config."
       when: copy_check.changed
 
     # 8. Validar enlace simbólico en /guias/config

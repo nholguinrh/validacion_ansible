@@ -101,8 +101,6 @@
       line: "CUPS está activo o habilitado en {{ inventory_hostname }}."
     when: cups_status.changed
 
-  # Continuar con las mismas modificaciones para el resto de las tareas...
-
   # 5. Verificación de usuarios
   - name: Verificar si los usuarios existen
     ansible.builtin.shell: id {{ item }}

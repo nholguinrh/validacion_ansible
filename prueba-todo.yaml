@@ -1,6 +1,6 @@
 ---
 - name: Validaciones en RHEL 9 sin cambios
-  hosts: localhost
+  hosts: all
   become: yes
   tasks:
 
@@ -14,60 +14,67 @@
     ansible.builtin.shell: yum check-update
     register: update_check
     ignore_errors: yes
-  - name: Registrar log y mostrar mensaje si el sistema no está actualizado
+
+  - name: Mostrar mensaje sobre la actualización del sistema
+    ansible.builtin.debug:
+      msg: "Punto 1: El sistema está actualizado en {{ inventory_hostname }}."
+    when: update_check.rc == 0
+
+  - name: Mostrar mensaje si el sistema no está actualizado
+    ansible.builtin.debug:
+      msg: "Punto 1 Invalido: El sistema tiene actualizaciones pendientes en {{ inventory_hostname }}."
+    when: update_check.rc != 0
+
+  - name: Registrar log si el sistema no está actualizado
     ansible.builtin.lineinfile:
       path: /var/log/ansible_validations.log
       line: "El sistema no está actualizado en {{ inventory_hostname }}."
     when: update_check.rc != 0
-  - name: Mostrar mensaje si el sistema no está actualizado
-    ansible.builtin.debug:
-      msg: "Punto 1: Sistema tiene actualizaciones pendientes en {{ inventory_hostname }}"
-    when: update_check.rc != 0
-  - name: Mostrar mensaje si el sistema está actualizado
-    ansible.builtin.debug:
-      msg: "Punto 1: Sistema está actualizado en {{ inventory_hostname }}"
-    when: update_check.rc == 0
 
-  # 2. Verificar si samba y samba-client están instalados (solo validación)
+  # 2. Verificar si samba y samba-client están instalados
   - name: Verificar instalación de samba y samba-client
     ansible.builtin.command:
       cmd: "rpm -q samba samba-client"
     register: samba_check
     ignore_errors: yes
-  - name: Registrar log y mostrar mensaje si samba o samba-client no están instalados
+
+  - name: Mostrar mensaje sobre la instalación de samba y samba-client
+    ansible.builtin.debug:
+      msg: "Punto 2: Samba y samba-client están instalados en {{ inventory_hostname }}."
+    when: samba_check.rc == 0
+
+  - name: Mostrar mensaje si samba o samba-client no están instalados
+    ansible.builtin.debug:
+      msg: "Punto 2 Invalido: Samba o samba-client no están instalados en {{ inventory_hostname }}."
+    when: samba_check.rc != 0
+
+  - name: Registrar log si samba o samba-client no están instalados
     ansible.builtin.lineinfile:
       path: /var/log/ansible_validations.log
       line: "Samba o samba-client no están instalados en {{ inventory_hostname }}."
     when: samba_check.rc != 0
-  - name: Mostrar mensaje si samba o samba-client no están instalados
-    ansible.builtin.debug:
-      msg: "Punto 2: Samba o samba-client no están instalados en {{ inventory_hostname }}"
-    when: samba_check.rc != 0
-  - name: Mostrar mensaje si samba y samba-client están instalados
-    ansible.builtin.debug:
-      msg: "Punto 2: Samba y samba-client están instalados en {{ inventory_hostname }}"
-    when: samba_check.rc == 0
 
   # 3. Verificar si SELinux está activo
   - name: Verificar si SELinux está activo
     ansible.builtin.shell: getenforce
     register: selinux_status
-  - name: Registrar log y mostrar mensaje si SELinux no está activo
+
+  - name: Mostrar mensaje sobre SELinux
+    ansible.builtin.debug:
+      msg: "Punto 3: SELinux está activo en {{ inventory_hostname }}."
+    when: selinux_status.stdout == "Enforcing"
+
+  - name: Mostrar mensaje si SELinux no está activo
+    ansible.builtin.debug:
+      msg: "Punto 3 Invalido: SELinux no está activo en {{ inventory_hostname }}."
+    when: selinux_status.stdout != "Enforcing"
+
+  - name: Registrar log si SELinux no está activo
     ansible.builtin.lineinfile:
       path: /var/log/ansible_validations.log
       line: "SELinux no está activo en {{ inventory_hostname }}."
     when: selinux_status.stdout != "Enforcing"
-  - name: Mostrar mensaje si SELinux no está activo
-    ansible.builtin.debug:
-      msg: "Punto 3: SELinux no está activo en {{ inventory_hostname }}"
-    when: selinux_status.stdout != "Enforcing"
-  - name: Mostrar mensaje si SELinux está activo
-    ansible.builtin.debug:
-      msg: "Punto 3: SELinux está activo en {{ inventory_hostname }}"
-    when: selinux_status.stdout == "Enforcing"
 
-  # Continúa con el mismo patrón para el resto de las validaciones...
-  
   # 4. Verificar si CUPS está deshabilitado
   - name: Verificar si CUPS está deshabilitado
     ansible.builtin.systemd:
@@ -77,18 +84,49 @@
       masked: yes
     check_mode: yes
     register: cups_status
-  - name: Registrar log y mostrar mensaje si CUPS está activo o habilitado
+
+  - name: Mostrar mensaje sobre CUPS
+    ansible.builtin.debug:
+      msg: "Punto 4: CUPS está deshabilitado en {{ inventory_hostname }}."
+    when: not cups_status.changed
+
+  - name: Mostrar mensaje si CUPS está activo o habilitado
+    ansible.builtin.debug:
+      msg: "Punto 4 Invalido: CUPS está activo o habilitado en {{ inventory_hostname }}."
+    when: cups_status.changed
+
+  - name: Registrar log si CUPS está activo o habilitado
     ansible.builtin.lineinfile:
       path: /var/log/ansible_validations.log
       line: "CUPS está activo o habilitado en {{ inventory_hostname }}."
     when: cups_status.changed
-  - name: Mostrar mensaje si CUPS está activo o habilitado
-    ansible.builtin.debug:
-      msg: "Punto 4: CUPS está activo o habilitado en {{ inventory_hostname }}"
-    when: cups_status.changed
-  - name: Mostrar mensaje si CUPS está deshabilitado correctamente
-    ansible.builtin.debug:
-      msg: "Punto 4: CUPS está deshabilitado correctamente en {{ inventory_hostname }}"
-    when: not cups_status.changed
 
-  # Aplica el mismo formato para los puntos restantes...
+  # Continuar con las mismas modificaciones para el resto de las tareas...
+
+  # 5. Verificación de usuarios
+  - name: Verificar si los usuarios existen
+    ansible.builtin.shell: id {{ item }}
+    loop:
+      - compras
+      - comercial
+      - ventas
+      - administrativo
+      - soporte
+    register: users_check
+    ignore_errors: yes
+
+  - name: Mostrar mensaje si todos los usuarios existen
+    ansible.builtin.debug:
+      msg: "Punto 5: Todos los usuarios existen en {{ inventory_hostname }}."
+    when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
+
+  - name: Mostrar mensaje si algún usuario no existe
+    ansible.builtin.debug:
+      msg: "Punto 5 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
+    when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
+
+  - name: Registrar log si algún usuario no existe
+    ansible.builtin.lineinfile:
+      path: /var/log/ansible_validations.log
+      line: "El usuario {{ item }} no existe en {{ inventory_hostname }}."
+    when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0

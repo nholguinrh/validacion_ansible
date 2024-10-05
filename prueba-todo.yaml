@@ -107,7 +107,7 @@
     - name: Registrar log si la carpeta /guias no existe o no pertenece al grupo hackatonLabs
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "La carpeta ~/guias no existe o no pertenece al grupo hackatonLabs en {{ inventory_hostname }}."
+        line: "La carpeta /guias no existe o no pertenece al grupo hackatonLabs en {{ inventory_hostname }}."
       when: guias_folder_check.changed
 
     # 6. Verificar que existan 100 archivos vacíos

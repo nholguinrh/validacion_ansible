@@ -17,6 +17,11 @@
       ansible.builtin.debug:
         msg: "Punto 1: VALIDO El sistema está actualizado."
       when: update_check.rc == 0
+    - name: Mostrar mensaje sobre la actualización del sistema
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 1: Valido El sistema está actualizado."
+      when: update_check.rc == 0  
     - name: Mostrar mensaje si el sistema no está actualizado
       ansible.builtin.debug:
         msg: "Punto 1: INVALIDO El sistema tiene actualizaciones pendientes."

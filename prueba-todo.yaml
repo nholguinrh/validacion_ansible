@@ -229,7 +229,7 @@
       register: file_check 
     - name: redhat-release están presentes en /guias/config
       ansible.builtin.lineinfile:
-       path: /var/log/ansible_validations.log
+        path: /var/log/ansible_validations.log
         line: "Punto 7 Valido: Las copias de archivos linux.words están presentes en /guias/config."
       when: file_check.exist        
 
@@ -240,7 +240,7 @@
     - name: redhat-release están presentes en /guias/config
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-          line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
+        line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
       when: file_check.exist  
 
     - name: Registrar log si las copias de archivos no están presentes en /guias/config

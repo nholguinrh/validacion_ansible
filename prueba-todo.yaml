@@ -75,36 +75,33 @@
       line: "SELinux no está activo en {{ inventory_hostname }}."
     when: selinux_status.stdout != "Enforcing"
 
-# 4 Verificar si el servicio CUPS existe
-  - name: Check if Service Exists
-    shell: "if chkconfig --list | grep -q cups; then echo true; else echo false; fi;"
-    register: service_exists
+---
+- name: Verificación de servicio CUPS
+  hosts: localhost
+  become: yes
+  tasks:
 
-  - name: Verificar si CUPS está presente
-    ansible.builtin.systemd:
-      name: cups
-      state: stopped
-    when: service_exists.stdout == "true"
-    register: cups_status
-    failed_when: false  # Evitar que falle si el servicio no existe
-    changed_when: false  # No marcar la tarea como cambiada
-    ignore_errors: yes
+    # 4.1 Verificar si el servicio CUPS existe
+    - name: Check if CUPS service exists
+      shell: "systemctl list-units --type=service | grep -q cups && echo true || echo false"
+      register: cups_service_exists
 
-  - name: Mostrar mensaje si CUPS no está instalado
-    ansible.builtin.debug:
-      msg: "Punto 4: El servicio CUPS no está instalado en {{ inventory_hostname }}."
-    when: service_exists.stdout == "false"
+    # 4.2 Verificar si CUPS está detenido y deshabilitado, si el servicio existe
+    - name: Verificar si CUPS está detenido
+      ansible.builtin.systemd:
+        name: cups
+        state: stopped
+        enabled: no
+      when: cups_service_exists.stdout == "true"
 
-  - name: Registrar log si CUPS está activo o habilitado
-    ansible.builtin.lineinfile:
-      path: /var/log/ansible_validations.log
-      line: "CUPS está activo o habilitado en {{ inventory_hostname }}."
-    when: cups_status.changed and "'Could not find the requested service' not in cups_status.msg"
+    # 4.3 Registrar en el log si el servicio no existe
+    - name: Registrar que CUPS no está instalado
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible-cups.log
+        create: yes
+        line: "El servicio CUPS no está instalado en {{ inventory_hostname }} - {{ ansible_date_time.date }}."
+      when: cups_service_exists.stdout == "false"
 
-  - name: Mostrar mensaje si CUPS está deshabilitado
-    ansible.builtin.debug:
-      msg: "Punto 4: CUPS está deshabilitado en {{ inventory_hostname }}."
-    when: not cups_status.changed and "'Could not find the requested service' not in cups_status.msg"
 
 
   # 5. Verificación de usuarios

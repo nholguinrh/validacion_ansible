@@ -205,7 +205,7 @@
       when: guias_config_check.failed
 
     - name: Verificar copias de archivos
-      ansible.builtin.command:
+      ansible.builtin.stat:
         cmd: stat /guias/config/redhat-release
       register: file_check 
       ignore_errors: yes
@@ -216,8 +216,8 @@
       when: file_check.exist  
       ignore_errors: yes
     - name: Verificar copias de archivos
-      ansible.builtin.command:
-         cmd: stat /guias/config/passwd
+      ansible.builtin.stat:
+        path: /guias/config/passwd
       register: file_check 
       ignore_errors: yes
     - name: redhat-release están presentes en /guias/config
@@ -226,8 +226,8 @@
         line: "Punto 7 Valido: Las copias de archivos passwd están presentes en /guias/config."
       when: file_check.exist  
     - name: Verificar copias de archivos
-      ansible.builtin.command:
-       cmd: stat /guias/config/linux.words
+      ansible.builtin.stat:
+       path: /guias/config/linux.words
       register: file_check 
       ignore_errors: yes
     - name: redhat-release están presentes en /guias/config
@@ -237,8 +237,8 @@
       when: file_check.exist        
 
     - name: Verificar copias de archivos
-      ansible.builtin.command:
-        cmd: stat /guias/config/redhat-release
+      ansible.builtin.stat:
+        path: /guias/config/redhat-release
       register: file_check 
       ignore_errors: yes
     - name: redhat-release están presentes en /guias/config

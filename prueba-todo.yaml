@@ -1,6 +1,6 @@
 ---
 - name: Validaciones en RHEL 9 sin cambios
-  hosts: all
+  hosts: localhost
   become: yes
   tasks:
 
@@ -14,13 +14,19 @@
     ansible.builtin.shell: yum check-update
     register: update_check
     ignore_errors: yes
-  - name: Registrar log si el sistema no está actualizado
+  - name: Registrar log y mostrar mensaje si el sistema no está actualizado
     ansible.builtin.lineinfile:
       path: /var/log/ansible_validations.log
       line: "El sistema no está actualizado en {{ inventory_hostname }}."
-      - name: salida de consola
-        shell: echo 'Punto 1 Invalido el sistema tiene actualizaciones pendientes'
     when: update_check.rc != 0
+  - name: Mostrar mensaje si el sistema no está actualizado
+    ansible.builtin.debug:
+      msg: "Punto 1: Sistema tiene actualizaciones pendientes en {{ inventory_hostname }}"
+    when: update_check.rc != 0
+  - name: Mostrar mensaje si el sistema está actualizado
+    ansible.builtin.debug:
+      msg: "Punto 1: Sistema está actualizado en {{ inventory_hostname }}"
+    when: update_check.rc == 0
 
   # 2. Verificar si samba y samba-client están instalados (solo validación)
   - name: Verificar instalación de samba y samba-client

@@ -121,12 +121,14 @@
       ansible.builtin.debug:
         msg: "Punto 5 Invalido: La carpeta /guias no existe."
       when: guias_check.stat.exists == false
+      ignore_errors: yes
 
     - name: Registrar log si la carpeta /guias no existe
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 5 Invalido: La carpeta /guias no existe."
       when: guias_check.stat.exists == false
+      ignore_errors: yes
 
     - name: Verificar pertenencia de la carpeta /guias al grupo hackatonLabs
       ansible.builtin.shell: |
@@ -137,6 +139,7 @@
         fi
       register: guias_group_check
       when: guias_check.stat.exists == true
+      ignore_errors: yes
 
     - name: Mostrar mensaje sobre la pertenencia de la carpeta /guias al grupo hackatonLabs
       ansible.builtin.debug:

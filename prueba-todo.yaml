@@ -37,6 +37,11 @@
       ansible.builtin.debug:
         msg: "Punto 2: VALIDO Samba y samba-client están instalados"
       when: samba_check.rc == 0
+    - name: Mostrar mensaje sobre la instalación de samba y samba-client
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 2 Valido: Samba y samba-client están instalados"
+      when: samba_check.rc == 0
     - name: Mostrar mensaje si samba o samba-client no están instalados
       ansible.builtin.debug:
         msg: "Punto 2 Invalido: Samba o samba-client no están instalados"

@@ -64,6 +64,11 @@
         path: /var/log/ansible_validations.log
         line: "Punto 3 Invalido: SELinux no está activo en"
       when: selinux_status.stdout != "Enforcing"
+    - name: Registrar log si SELinux no está activo
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 3 Valido: SELinux está activo en"
+      when: selinux_status.stdout == "Enforcing"  
 
     # 4. Verificación de usuarios
     - name: Verificar si los usuarios existen

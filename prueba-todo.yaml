@@ -192,7 +192,7 @@
     - name: Registrar log si el enlace simbólico no existe o está mal creado
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "El enlace simbólico /guias/config/grupos no existe o está mal creado en {{ inventory_hostname }}."
+        line: "Punto 8 Invalido: El enlace simbólico /guias/config/grupos no existe o está mal creado."
       when: symlink_check.changed
 
     # 9. Verificar la frase en /etc/motd
@@ -203,5 +203,5 @@
     - name: Registrar log si la frase no está en /etc/motd
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "La frase 'El problema no es problema' no está en /etc/motd en {{ inventory_hostname }}."
+        line: "Punto 9 Invalido: La frase 'El problema no es problema' no está en /etc/motd."
       when: motd_check.rc != 0

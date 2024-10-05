@@ -75,7 +75,7 @@
       line: "SELinux no está activo en {{ inventory_hostname }}."
     when: selinux_status.stdout != "Enforcing"
     
-# 4. Verificar si el servicio CUPS existe en el sistema
+---
 - name: Verificación de servicio CUPS
   hosts: localhost
   become: yes
@@ -94,15 +94,26 @@
       when: cups_status.failed
 
     - block:
-        - name: Verificar si CUPS está detenido
+        # 4.3.1 Validar si CUPS está detenido
+        - name: Validar si CUPS está detenido
           ansible.builtin.systemd:
             name: cups
             state: stopped
-
-        - name: Asegurarse de que CUPS no se inicie al reiniciar
-          ansible.builtin.systemd:
-            name: cups
             enabled: no
+          register: cups_check
+
+        - name: Mostrar mensaje si CUPS está detenido y deshabilitado
+          debug:
+            msg: "El servicio CUPS está deshabilitado y detenido en {{ inventory_hostname }}."
+          when:
+            - cups_check.status == 3
+            - cups_check.enabled == false
+
+        - name: Mostrar mensaje si CUPS está habilitado o en ejecución
+          debug:
+            msg: "El servicio CUPS está habilitado o en ejecución en {{ inventory_hostname }}."
+          when:
+            - cups_check.status != 3 or cups_check.enabled != false
 
       when: not cups_status.failed
 

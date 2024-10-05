@@ -206,7 +206,7 @@
 
     - name: Verificar copias de archivos
       ansible.builtin.stat:
-        cmd: stat /guias/config/redhat-release
+        path: /guias/config/redhat-release
       register: file_check 
       ignore_errors: yes
     - name: redhat-release están presentes en /guias/config

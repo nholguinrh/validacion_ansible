@@ -76,7 +76,7 @@
         path: /var/log/ansible_validations.log
         create: yes
         line: "El servicio cups no está instalado en {{ inventory_hostname }} - {{ ansible_date_time.date }}."
-      when: cupsh_status.failed
+      when: cups_status.failed
 
     - block:
         - name: Validar si cups está detenido

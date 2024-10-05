@@ -251,7 +251,7 @@
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 7 Invalido: Las copias de archivos no están presentes en /guias/config."
-      when: copy_check.changed
+      when: file_check.stat.exists
     # 8. Validar enlace simbólico en /guias/config
     - name: Verificar si el enlace simbólico /guias/config/grupos existe y apunta a /etc/group
       ansible.builtin.file:

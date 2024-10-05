@@ -75,7 +75,7 @@
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         create: yes
-        line: "El servicio cups no está instalado en {{ inventory_hostname }} - {{ ansible_date_time.date }}."
+        line: "El servicio cups no está instalado en {{ inventory_hostname }}"
       when: cups_status.failed
 
     - block:

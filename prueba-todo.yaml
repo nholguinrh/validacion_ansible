@@ -125,41 +125,6 @@
         path: /var/log/ansible_validations.log
         line: "El usuario {{ item }} no existe en {{ inventory_hostname }}."
       when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
-   # Paso 6: Verificar si CUPS está deshabilitado
-    - name: Verificar si CUPS está deshabilitado
-      ansible.builtin.systemd:
-        name: cups
-        enabled: no
-        state: stopped
-        masked: yes
-      check_mode: yes
-      register: cups_status
-    - name: Registrar log si CUPS está activo o habilitado
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "CUPS está activo o habilitado en {{ inventory_hostname }}."
-      when: cups_status.changed
-  
-    # Paso 7: Verificar usuarios y contraseñas
-    - name: Verificar usuarios y contraseñas
-      ansible.builtin.user:
-        name: "{{ item }}"
-        password: "{{ 'DefaultHackatonLabs123*' | password_hash('sha512') }}"
-        groups: hackatonLabs
-        state: present
-      check_mode: yes
-      loop:
-        - compras
-        - comercial
-        - ventas
-        - administrativo
-        - soporte
-      register: users_check
-    - name: Registrar log si falta algún usuario o no tiene la contraseña correcta
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "El usuario {{ item.item }} no está presente o no tiene la contraseña correcta en {{ inventory_hostname }}."
-      when: users_check.results | selectattr('changed') | list | length > 0
   
     # Paso 8: Verificar carpeta ~/guias
     - name: Verificar que la carpeta ~/guias exista y pertenezca al grupo hackatonLabs

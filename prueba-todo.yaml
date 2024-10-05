@@ -223,32 +223,31 @@
         path: /var/log/ansible_validations.log
         line: "Punto 7 Valido: Las copias de archivos passwd están presentes en /guias/config."
       when: file_check.exist  
-     - name: Verificar copias de archivos
-       ansible.builtin.command:
-         cmd: stat /guias/config/linux.words
-       register: file_check 
-     - name: redhat-release están presentes en /guias/config
-       ansible.builtin.lineinfile:
-         path: /var/log/ansible_validations.log
-         line: "Punto 7 Valido: Las copias de archivos linux.words están presentes en /guias/config."
-       when: file_check.exist        
+    - name: Verificar copias de archivos
+      ansible.builtin.command:
+       cmd: stat /guias/config/linux.words
+      register: file_check 
+    - name: redhat-release están presentes en /guias/config
+      ansible.builtin.lineinfile:
+       path: /var/log/ansible_validations.log
+        line: "Punto 7 Valido: Las copias de archivos linux.words están presentes en /guias/config."
+      when: file_check.exist        
 
-      - name: Verificar copias de archivos
-        ansible.builtin.command:
-          cmd: stat /guias/config/redhat-release
-        register: file_check 
-      - name: redhat-release están presentes en /guias/config
-        ansible.builtin.lineinfile:
-          path: /var/log/ansible_validations.log
+    - name: Verificar copias de archivos
+      ansible.builtin.command:
+        cmd: stat /guias/config/redhat-release
+      register: file_check 
+    - name: redhat-release están presentes en /guias/config
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
           line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
-        when: file_check.exist  
+      when: file_check.exist  
 
-      - name: Registrar log si las copias de archivos no están presentes en /guias/config
-        ansible.builtin.lineinfile:
-          path: /var/log/ansible_validations.log
-          line: "Punto 7 Invalido: Las copias de archivos no están presentes en /guias/config."
-        when: copy_check.changed
-
+    - name: Registrar log si las copias de archivos no están presentes en /guias/config
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 7 Invalido: Las copias de archivos no están presentes en /guias/config."
+      when: copy_check.changed
     # 8. Validar enlace simbólico en /guias/config
     - name: Verificar si el enlace simbólico /guias/config/grupos existe y apunta a /etc/group
       ansible.builtin.file:

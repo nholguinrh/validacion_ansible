@@ -154,16 +154,6 @@
       when: guias_check.stat.gr_name != 'hackatonLabs'
       ignore_errors: yes  
 
-    - name: Mostrar mensaje sobre la pertenencia de la carpeta /guias al grupo hackatonLabs
-      ansible.builtin.debug:
-        msg: "Punto 5: VALIDO La carpeta /guias pertenece al grupo hackatonLabs."
-      when: guias_group_check.stdout == "VALIDO"
-
-    - name: Registrar log si la carpeta /guias no pertenece al grupo hackatonLabs
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "Punto 5 Invalido: La carpeta /guias no pertenece al grupo hackatonLabs."
-      when: guias_group_check.stdout == "INVALIDO"
 
     # 6. Verificar que existan 100 archivos vacíos
     - name: Verificar si existen los archivos archivo-1.txt a archivo-100.txt en /guias

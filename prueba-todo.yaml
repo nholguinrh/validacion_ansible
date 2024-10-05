@@ -104,7 +104,7 @@
         mode: '0775'
       check_mode: yes
       register: guias_folder_check
-    - name: Registrar log si la carpeta ~/guias no existe o no pertenece al grupo hackatonLabs
+    - name: Registrar log si la carpeta /guias no existe o no pertenece al grupo hackatonLabs
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "La carpeta ~/guias no existe o no pertenece al grupo hackatonLabs en {{ inventory_hostname }}."

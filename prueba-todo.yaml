@@ -15,16 +15,16 @@
       ignore_errors: yes
     - name: Mostrar mensaje sobre la actualización del sistema
       ansible.builtin.debug:
-        msg: "Punto 1: El sistema está actualizado en {{ inventory_hostname }}."
+        msg: "Punto 1: VALIDO El sistema está actualizado."
       when: update_check.rc == 0
     - name: Mostrar mensaje si el sistema no está actualizado
       ansible.builtin.debug:
-        msg: "Punto 1 Invalido: El sistema tiene actualizaciones pendientes en {{ inventory_hostname }}."
+        msg: "Punto 1: INVALIDO El sistema tiene actualizaciones pendientes."
       when: update_check.rc != 0
     - name: Registrar log si el sistema no está actualizado
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "El sistema no está actualizado en {{ inventory_hostname }}."
+        line: "Punto 1: INVALIDO El sistema no está actualizado."
       when: update_check.rc != 0
 
     # 2. Verificar si samba y samba-client están instalados
@@ -35,16 +35,16 @@
       ignore_errors: yes
     - name: Mostrar mensaje sobre la instalación de samba y samba-client
       ansible.builtin.debug:
-        msg: "Punto 2: Samba y samba-client están instalados en {{ inventory_hostname }}."
+        msg: "Punto 2: VALIDO Samba y samba-client están instalados"
       when: samba_check.rc == 0
     - name: Mostrar mensaje si samba o samba-client no están instalados
       ansible.builtin.debug:
-        msg: "Punto 2 Invalido: Samba o samba-client no están instalados en {{ inventory_hostname }}."
+        msg: "Punto 2 Invalido: Samba o samba-client no están instalados"
       when: samba_check.rc != 0
     - name: Registrar log si samba o samba-client no están instalados
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "Samba o samba-client no están instalados en {{ inventory_hostname }}."
+        line: "Punto 2 Invalido: Samba o samba-client no están instalados"
       when: samba_check.rc != 0
 
     # 3. Verificar si SELinux está activo
@@ -53,16 +53,16 @@
       register: selinux_status
     - name: Mostrar mensaje sobre SELinux
       ansible.builtin.debug:
-        msg: "Punto 3: SELinux está activo en {{ inventory_hostname }}."
+        msg: "Punto 3: VALIDO SELinux está activo"
       when: selinux_status.stdout == "Enforcing"
     - name: Mostrar mensaje si SELinux no está activo
       ansible.builtin.debug:
-        msg: "Punto 3 Invalido: SELinux no está activo en {{ inventory_hostname }}."
+        msg: "Punto 3 Invalido: SELinux no está activo."
       when: selinux_status.stdout != "Enforcing"
     - name: Registrar log si SELinux no está activo
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "SELinux no está activo en {{ inventory_hostname }}."
+        line: "Punto 3 Invalido: SELinux no está activo en"
       when: selinux_status.stdout != "Enforcing"
 
     # 4. Verificación de usuarios
@@ -78,12 +78,12 @@
       ignore_errors: yes
     - name: Mostrar mensaje si todos los usuarios existen
       ansible.builtin.debug:
-        msg: "Punto 4: Todos los usuarios existen en {{ inventory_hostname }}."
+        msg: "Punto 4 VALIDO: Todos los usuarios existen."
       when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
     - name: Registrar log si los usuarios existen
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "Punto 4: Todos los usuarios existen en {{ inventory_hostname }}."
+        line: "Punto 4 VALIDO: Todos los usuarios existen en {{ inventory_hostname }}."
       when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
     - name: Mostrar mensaje si algún usuario no existe
       ansible.builtin.debug:
@@ -107,7 +107,7 @@
     - name: Registrar log si la carpeta /guias no existe o no pertenece al grupo hackatonLabs
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "La carpeta /guias no existe o no pertenece al grupo hackatonLabs en {{ inventory_hostname }}."
+        line: "Punto 5 INVALIDO: La carpeta /guias no existe o no pertenece al grupo hackatonLabs."
       when: guias_folder_check.changed
 
     # 6. Verificar que existan 100 archivos vacíos
@@ -120,10 +120,15 @@
             path: "/guias/archivo-{{ item }}.txt"
           loop: "{{ range(1, 101) | list }}"
           register: archivos_check
+        - name: Agregar archivos faltantes a la lista
+          set_fact:
+            files_missing: "{{ files_missing + ['archivo-' + item.item + '.txt'] }}"
+          when: not archivos_check.results[item.0].stat.exists
+          loop: "{{ range(1, 101) | list | zip(archivos_check.results) | list }}"  
 
         - name: Mostrar mensaje en consola si faltan archivos
           ansible.builtin.debug:
-            msg: "Punto 6 Invalido: Faltan los archivos {{ files_missing }} en {{ inventory_hostname }}."
+            msg: "Punto 6 Invalido: Faltan archivos"
           when: files_missing | length > 0
 
 

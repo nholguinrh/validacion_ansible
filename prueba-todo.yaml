@@ -116,13 +116,13 @@
       when: guias_folder_check.changed
 
     # 6. Verificar que existan 100 archivos vacíos
-    - name: Verificar si existen los archivos archivo-1.txt a archivo-100.txt en ~/guias
+    - name: Verificar si existen los archivos archivo-1.txt a archivo-100.txt en /guias
       vars:
         files_missing: []
       block:
         - name: Comprobar existencia de archivos archivo-1.txt a archivo-100.txt
           ansible.builtin.stat:
-            path: "/home/{{ ansible_user }}/guias/archivo-{{ item }}.txt"
+            path: "/guias/archivo-{{ item }}.txt"
           loop: "{{ range(1, 101) | list }}"
           register: archivos_check
 

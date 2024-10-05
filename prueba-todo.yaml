@@ -208,16 +208,18 @@
       ansible.builtin.command:
         cmd: stat /guias/config/redhat-release
       register: file_check 
+      ignore_errors: yes
     - name: redhat-release están presentes en /guias/config
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 7 Valido: Las copias de archivos redhat-releaseo están presentes en /guias/config."
       when: file_check.exist  
-
+      ignore_errors: yes
     - name: Verificar copias de archivos
       ansible.builtin.command:
          cmd: stat /guias/config/passwd
       register: file_check 
+      ignore_errors: yes
     - name: redhat-release están presentes en /guias/config
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
@@ -227,6 +229,7 @@
       ansible.builtin.command:
        cmd: stat /guias/config/linux.words
       register: file_check 
+      ignore_errors: yes
     - name: redhat-release están presentes en /guias/config
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
@@ -237,6 +240,7 @@
       ansible.builtin.command:
         cmd: stat /guias/config/redhat-release
       register: file_check 
+      ignore_errors: yes
     - name: redhat-release están presentes en /guias/config
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log

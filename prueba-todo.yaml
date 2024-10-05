@@ -121,21 +121,9 @@
           loop: "{{ range(1, 101) | list }}"
           register: archivos_check
 
-        - name: Agregar archivos faltantes a la lista
-          set_fact:
-            files_missing: "{{ files_missing + ['archivo-' + item.item + '.txt'] }}"
-          when: not archivos_check.results[item.0].stat.exists
-          loop: "{{ range(1, 101) | list | zip(archivos_check.results) | list }}"
-
         - name: Mostrar mensaje en consola si faltan archivos
           ansible.builtin.debug:
             msg: "Punto 6 Invalido: Faltan los archivos {{ files_missing }} en {{ inventory_hostname }}."
-          when: files_missing | length > 0
-
-        - name: Registrar log si faltan archivos
-          ansible.builtin.lineinfile:
-            path: /var/log/ansible_validations.log
-            line: "Punto 6 Invalido: Faltan los archivos {{ files_missing }} en {{ inventory_hostname }}."
           when: files_missing | length > 0
 
 

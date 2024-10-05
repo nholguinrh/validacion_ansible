@@ -111,18 +111,33 @@
       when: guias_folder_check.changed
 
     # 6. Verificar que existan 100 archivos vacíos
-    - name: Verificar si existen 100 archivos en /guias
-      ansible.builtin.shell: |
-        for i in $(seq 1 100); do
-          touch /guias/archivo-$i.txt
-        done
-      check_mode: yes
-      register: archivos_check
-    - name: Registrar log si no existen los archivos archivo-1.txt a archivo-100.txt
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "No existen 100 archivos archivo-1.txt a archivo-100.txt en {{ inventory_hostname }}."
-      when: archivos_check.changed
+    - name: Verificar si existen los archivos archivo-1.txt a archivo-100.txt en /guias
+      vars:
+        files_missing: []
+      block:
+        - name: Comprobar existencia de archivos archivo-1.txt a archivo-100.txt
+          ansible.builtin.stat:
+            path: "/guias/archivo-{{ item }}.txt"
+          loop: "{{ range(1, 101) | list }}"
+          register: archivos_check
+
+        - name: Agregar archivos faltantes a la lista
+          set_fact:
+            files_missing: "{{ files_missing + ['archivo-' + item.item + '.txt'] }}"
+          when: not archivos_check.results[item.0].stat.exists
+          loop: "{{ range(1, 101) | list | zip(archivos_check.results) | list }}"
+
+        - name: Mostrar mensaje en consola si faltan archivos
+          ansible.builtin.debug:
+            msg: "Punto 6 Invalido: Faltan los archivos {{ files_missing }} en {{ inventory_hostname }}."
+          when: files_missing | length > 0
+
+        - name: Registrar log si faltan archivos
+          ansible.builtin.lineinfile:
+            path: /var/log/ansible_validations.log
+            line: "Punto 6 Invalido: Faltan los archivos {{ files_missing }} en {{ inventory_hostname }}."
+          when: files_missing | length > 0
+
 
     # 7. Verificar carpeta /guias/config y archivos
     - name: Verificar que /guias/config tenga copias de archivos importantes

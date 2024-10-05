@@ -81,7 +81,7 @@
     - block:
         - name: Validar si cups está detenido
           ansible.builtin.systemd:
-            name: bluetooth
+            name: cups
             state: stopped
             enabled: no
           register: cups_check

@@ -133,25 +133,25 @@
     - name: Verificar pertenencia de la carpeta /guias al grupo hackatonLabs
       ansible.builtin.debug:
         msg: "Punto 5: VALIDO La carpeta /guias pertenece al grupo hackatonLabs."
-      when: guias_check.stat.gr_name == hackatonLabs
+      when: guias_check.stat.gr_name == 'hackatonLabs'
       ignore_errors: yes
     - name: Verificar pertenencia de la carpeta /guias al grupo hackatonLabs
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 5: VALIDO La carpeta /guias pertenece al grupo hackatonLabs."
-      when: guias_check.stat.gr_name == hackatonLabs
+      when: guias_check.stat.gr_name == 'hackatonLabs'
       ignore_errors: yes
       
     - name: Verificar pertenencia de la carpeta /guias al grupo hackatonLabs
       ansible.builtin.debug:
         msg: "Punto 5: Invalido La carpeta /guias no pertenece al grupo hackatonLabs."
-      when: guias_check.stat.gr_name != hackatonLabs
+      when: guias_check.stat.gr_name != 'hackatonLabs'
       ignore_errors: yes
     - name: Verificar pertenencia de la carpeta /guias al grupo hackatonLabs
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
         line: "Punto 5: Invalido La carpeta /guias no pertenece al grupo hackatonLabs."
-      when: guias_check.stat.gr_name != hackatonLabs
+      when: guias_check.stat.gr_name != 'hackatonLabs'
       ignore_errors: yes  
 
     - name: Mostrar mensaje sobre la pertenencia de la carpeta /guias al grupo hackatonLabs

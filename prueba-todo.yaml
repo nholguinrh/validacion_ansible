@@ -110,6 +110,7 @@
       ansible.builtin.stat:
         path: /guias
       register: guias_check
+      ignore_errors: yes
 
     - name: Mostrar mensaje si la carpeta /guias no existe
       ansible.builtin.debug:

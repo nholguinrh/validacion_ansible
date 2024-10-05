@@ -95,11 +95,10 @@
         line: "Punto 4 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
       when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
 
-    # 5. Verificar carpeta ~/guias
-    - name: Verificar que la carpeta ~/guias exista y pertenezca al grupo hackatonLabs
+    # 5. Verificar carpeta /guias
+    - name: Verificar que la carpeta /guias exista y pertenezca al grupo hackatonLabs
       ansible.builtin.file:
-        path: /home/{{ ansible_user }}/guias
-        owner: "{{ ansible_user }}"
+        path: /guias
         group: hackatonLabs
         state: directory
         mode: '0775'

@@ -78,27 +78,24 @@
       ignore_errors: yes
     - name: Mostrar mensaje si todos los usuarios existen
       ansible.builtin.debug:
-        msg: "Punto 5: Todos los usuarios existen en {{ inventory_hostname }}."
+        msg: "Punto 4: Todos los usuarios existen en {{ inventory_hostname }}."
       when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
-    - name: Registrar los usuarios existen
+    - name: Registrar log si los usuarios existen
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "Punto 4 valido los usuarios existen {{ inventory_hostname }}."
-      when: users_check.results | selectattr('rc', '==', 0) | list | length == 5  
+        line: "Punto 4: Todos los usuarios existen en {{ inventory_hostname }}."
+      when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
     - name: Mostrar mensaje si algún usuario no existe
       ansible.builtin.debug:
         msg: "Punto 4 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "Punto 4: Invalido: Algún usuario no exist"  
       when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
     - name: Registrar log si algún usuario no existe
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "El usuario {{ item }} no existe en {{ inventory_hostname }}."
+        line: "Punto 4 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
       when: users_check.results | selectattr('rc', '!=', 0) | list | length > 0
-  
-    # Paso 5: Verificar carpeta ~/guias
+
+    # 5. Verificar carpeta ~/guias
     - name: Verificar que la carpeta ~/guias exista y pertenezca al grupo hackatonLabs
       ansible.builtin.file:
         path: /home/{{ ansible_user }}/guias
@@ -113,8 +110,8 @@
         path: /var/log/ansible_validations.log
         line: "La carpeta ~/guias no existe o no pertenece al grupo hackatonLabs en {{ inventory_hostname }}."
       when: guias_folder_check.changed
-  
-    # Paso 6: Verificar que existan 100 archivos vacíos
+
+    # 6. Verificar que existan 100 archivos vacíos
     - name: Verificar si existen 100 archivos en ~/guias
       ansible.builtin.shell: |
         for i in $(seq 1 100); do
@@ -127,8 +124,8 @@
         path: /var/log/ansible_validations.log
         line: "No existen 100 archivos archivo-1.txt a archivo-100.txt en {{ inventory_hostname }}."
       when: archivos_check.changed
-  
-    # Paso 7: Verificar carpeta /guias/config y archivos
+
+    # 7. Verificar carpeta /guias/config y archivos
     - name: Verificar que /guias/config tenga copias de archivos importantes
       ansible.builtin.command:
         cmd: stat /guias/config
@@ -139,7 +136,7 @@
         path: /var/log/ansible_validations.log
         line: "/guias/config no tiene los archivos necesarios en {{ inventory_hostname }}."
       when: guias_config_check.failed
-  
+
     - name: Verificar copias de archivos
       ansible.builtin.copy:
         src: "{{ item }}"
@@ -156,8 +153,8 @@
         path: /var/log/ansible_validations.log
         line: "Las copias de archivos no están presentes en /guias/config en {{ inventory_hostname }}."
       when: copy_check.changed
-  
-    # Paso 8: Validar enlace simbólico en /guias/config
+
+    # 8. Validar enlace simbólico en /guias/config
     - name: Verificar si el enlace simbólico /guias/config/grupos existe y apunta a /etc/group
       ansible.builtin.file:
         path: /guias/config/grupos
@@ -170,8 +167,8 @@
         path: /var/log/ansible_validations.log
         line: "El enlace simbólico /guias/config/grupos no existe o está mal creado en {{ inventory_hostname }}."
       when: symlink_check.changed
-  
-    # Paso 9: Verificar la frase en /etc/motd
+
+    # 9. Verificar la frase en /etc/motd
     - name: Verificar si la frase 'El problema no es problema' está en /etc/motd
       ansible.builtin.shell: grep -Fxq 'El problema no es problema' /etc/motd
       register: motd_check
@@ -181,28 +178,16 @@
         path: /var/log/ansible_validations.log
         line: "La frase 'El problema no es problema' no está en /etc/motd en {{ inventory_hostname }}."
       when: motd_check.rc != 0
-  
-    # Paso 10: Verificar particiones en el sistema operativo
-    - name: Verificar si el archivo /tmp/particiones.txt existe y contiene las particiones correctas
-      ansible.builtin.command:
-        cmd: "diff <(lsblk -no NAME,SIZE) /tmp/particiones.txt"
+
+    # 10. Verificar partición /var
+    - name: Verificar si existe una partición montada en /var
+      ansible.builtin.mount:
+        path: /var
+        state: mounted
       check_mode: yes
-      register: partitions_check
-      ignore_errors: yes
-    - name: Registrar log si las particiones no coinciden o el archivo no existe
+      register: var_mount_check
+    - name: Registrar log si no hay partición en /var
       ansible.builtin.lineinfile:
         path: /var/log/ansible_validations.log
-        line: "Las particiones no coinciden o /tmp/particiones.txt no existe en {{ inventory_hostname }}."
-      when: partitions_check.rc != 0
-  
-    # Paso 11: Verificar que haya 25GB de espacio disponible
-    - name: Verificar que haya 25GB de espacio disponible
-      ansible.builtin.shell: |
-        df -h / | awk '$4 ~ /[2-9][0-9]G|100G/{ print $4 }'
-      register: space_check
-      ignore_errors: yes
-    - name: Registrar log si no hay 25GB de espacio disponible
-      ansible.builtin.lineinfile:
-        path: /var/log/ansible_validations.log
-        line: "No hay 25GB de espacio disponible en {{ inventory_hostname }}."
-      when: space_check.stdout == ""  
+        line: "No hay una partición montada en /var en {{ inventory_hostname }}."
+      when: var_mount_check.changed

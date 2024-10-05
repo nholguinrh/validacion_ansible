@@ -1,6 +1,6 @@
 ---
 - name: Validaciones en RHEL 9 sin cambios
-  hosts: all
+  hosts: localhost
   become: yes
   tasks:
 

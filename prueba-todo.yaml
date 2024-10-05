@@ -80,6 +80,11 @@
       ansible.builtin.debug:
         msg: "Punto 5: Todos los usuarios existen en {{ inventory_hostname }}."
       when: users_check.results | selectattr('rc', '==', 0) | list | length == 5
+    - name: Registrar los usuarios existen
+      ansible.builtin.lineinfile:
+        path: /var/log/ansible_validations.log
+        line: "Punto 4 valido los usuarios existen {{ inventory_hostname }}."
+      when: users_check.results | selectattr('rc', '==', 0) | list | length == 5  
     - name: Mostrar mensaje si algún usuario no existe
       ansible.builtin.debug:
         msg: "Punto 4 Invalido: Algún usuario no existe en {{ inventory_hostname }}."
